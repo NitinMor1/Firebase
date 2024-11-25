@@ -1,5 +1,10 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase/UI/signupScreen.dart';
+import 'package:firebase/UI/home.dart';
+import 'package:firebase/auth/loginphonenumber.dart';
+import 'package:firebase/auth/signupScreen.dart';
+import 'package:firebase/utils/toastmessage.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 
 class LoginScreen extends StatefulWidget {
@@ -11,6 +16,8 @@ class LoginScreenState extends State<LoginScreen> {
   final emailcontroller = TextEditingController();
   final passwordcontroller = TextEditingController();
   final _formfield = GlobalKey<FormState>();
+  final _auth = FirebaseAuth.instance;
+  bool loading = false;
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -76,19 +83,54 @@ class LoginScreenState extends State<LoginScreen> {
                   Expanded(
                     child: ElevatedButton(
                         onPressed: () {
-                          if (_formfield.currentState!.validate()) {}
+                          if (_formfield.currentState!.validate()) {
+                            setState(() {
+                              loading = true;
+                            });
+                            _auth
+                                .signInWithEmailAndPassword(
+                                    email: emailcontroller.text.toString(),
+                                    password:
+                                        passwordcontroller.text.toString())
+                                .then((value) {
+                              setState(() {
+                                loading = false;
+                              });
+                              Toastmessage().toastMessage('Login Successfully');
+                              emailcontroller.clear();
+                              passwordcontroller.clear();
+
+                              Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                      builder: (context) => Home()));
+                            }).onError(
+                              (error, stackTrace) {
+                                debugPrint(error.toString());
+                                setState(() {
+                                  loading = false;
+                                });
+                                Toastmessage().toastMessage(error.toString());
+                              },
+                            );
+                          }
                         },
                         style: ElevatedButton.styleFrom(
                             shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(10)),
                             backgroundColor: Colors.purple),
-                        child: Text(
-                          'Login',
-                          style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 20,
-                              fontWeight: FontWeight.bold),
-                        )),
+                        child: loading
+                            ? CircularProgressIndicator(
+                                strokeWidth: 3,
+                                color: Colors.white,
+                              )
+                            : Text(
+                                'Login',
+                                style: TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 20,
+                                    fontWeight: FontWeight.bold),
+                              )),
                   ),
                 ],
               ),
@@ -105,6 +147,26 @@ class LoginScreenState extends State<LoginScreen> {
                       },
                       child: Text('Sign Up'))
                 ],
+              ),
+              SizedBox(
+                height: 20,
+              ),
+              InkWell(
+                onTap: () {
+                  Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => Loginphonenumber()));
+                },
+                child: Container(
+                  height: 50,
+                  decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(50),
+                      border: Border.all(color: Colors.black)),
+                  child: Center(
+                    child: Text('Login with phone number'),
+                  ),
+                ),
               )
             ],
           ),

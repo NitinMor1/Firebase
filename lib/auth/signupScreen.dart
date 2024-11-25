@@ -1,5 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase/UI/loginScreen.dart';
+import 'package:firebase/auth/loginScreen.dart';
 import 'package:firebase/utils/toastmessage.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
